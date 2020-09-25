@@ -21,7 +21,7 @@
         }
     ],
     "require": {
-        "php": ">=5.4.0",
+        "php": ">=5.5.9",
         "datto/json-rpc": "^6.1",
         "datto/json-rpc-http": "^5.0"
     },
