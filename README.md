@@ -35,10 +35,10 @@ Find the `providers` key in `config/app.php` and register the JsonRpcHttpClient 
 
 Laravel 5.1+
 ```php
-    'providers' => [
-        // ...
-        Royalcms\Laravel\JsonRpcClient\JsonRpcClientServiceProvider::class,
-    ]
+'providers' => [
+    // ...
+    Royalcms\Laravel\JsonRpcClient\JsonRpcClientServiceProvider::class,
+]
 ```
 
 
@@ -68,7 +68,7 @@ return [
 
 ```
 ## 使用
-```
+```php
 use Royalcms\Laravel\JsonRpcClient\JsonRpcHttpClient;
 
 class a extends JsonRpcHttpClient {
