@@ -39,7 +39,10 @@ abstract class JsonRpcHttpClient
         try{
             $client = new Client(self::getUri());
             $service = $this->getService();
-            $client->query("{$service}/{$method}", $params, $response);
+            if ($service != 'default') {
+                $method = "{$service}/{$method}";
+            }
+            $client->query($method, $params, $response);
             $client->send();
             //如果返回异常，会提示message和code
             if(method_exists($response,'getMessage') && method_exists($response,'getCode')){
@@ -63,7 +66,22 @@ abstract class JsonRpcHttpClient
         $max = count($nodes);
         $r = rand(1, $max);
         $node = $nodes[$r - 1];
-        return "http://{$node['host']}:{$node['port']}";
+
+        if ($node['port'] == 80) {
+            $url = "http://{$node['host']}";
+        }
+        elseif ($node['port'] == 443) {
+            $url = "https://{$node['host']}";
+        }
+        else {
+            $url = "http://{$node['host']}:{$node['port']}";
+        }
+
+        if (isset($node['path'])) {
+            $url = $url . $node['path'];
+        }
+
+        return $url;
     }
 
     /**
