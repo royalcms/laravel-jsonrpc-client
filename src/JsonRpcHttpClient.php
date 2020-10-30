@@ -3,7 +3,6 @@
 namespace Royalcms\Laravel\JsonRpcClient;
 
 use Datto\JsonRpc\Http\Client;
-use Illuminate\Support\Str;
 
 abstract class JsonRpcHttpClient
 {
@@ -107,7 +106,7 @@ abstract class JsonRpcHttpClient
      */
     private function getService(): string
     {
-        $service = Str::before($this->serviceName, "Service");
+        $service = explode("Service", $this->serviceName)[0];
         return strtolower($service);
     }
 
