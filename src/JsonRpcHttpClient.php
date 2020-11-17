@@ -20,12 +20,6 @@ abstract class JsonRpcHttpClient
      */
     protected $protocol = 'jsonrpc-http';
 
-
-    public function __construct()
-    {
-
-    }
-
     /**
      * @param string $method
      * @param array $params
@@ -36,8 +30,9 @@ abstract class JsonRpcHttpClient
      */
     protected function __request(string $method, array $params, string $id = null)
     {
-        try{
-            $client = new Client(self::getUri());
+        try {
+            $headers = $this->getHeaders();
+            $client  = new BasicClient(self::getUri(), $headers);
             $service = $this->getService();
             if ($service != 'default') {
                 $method = "{$service}/{$method}";
@@ -45,14 +40,17 @@ abstract class JsonRpcHttpClient
             $client->query($method, $params, $response);
             $client->send();
             //如果返回异常，会提示message和code
-            if(method_exists($response,'getMessage') && method_exists($response,'getCode')){
+            if (method_exists($response, 'getMessage') && method_exists($response, 'getCode')) {
                 $message = $response->getMessage();
-                $code = $response->getCode();
+                $code    = $response->getCode();
                 throw new \Exception("code:$code,message:$message");
             }
             return $response;
-        }catch(\Exception $exception){
-            return ['code'=>-1,'message'=>$exception->getMessage()];
+        } catch (\Exception $exception) {
+            return [
+                'code'    => -1,
+                'message' => $exception->getMessage()
+            ];
         }
     }
 
@@ -62,18 +60,16 @@ abstract class JsonRpcHttpClient
     private function getUri(): string
     {
         $services = $this->getServices();
-        $nodes = $services [strtoupper($this->serviceName)];
-        $max = count($nodes);
-        $r = rand(1, $max);
-        $node = $nodes[$r - 1];
+        $nodes    = $services [strtoupper($this->serviceName)];
+        $max      = count($nodes);
+        $r        = rand(1, $max);
+        $node     = $nodes[$r - 1];
 
         if ($node['port'] == 80) {
             $url = "http://{$node['host']}";
-        }
-        elseif ($node['port'] == 443) {
+        } elseif ($node['port'] == 443) {
             $url = "https://{$node['host']}";
-        }
-        else {
+        } else {
             $url = "http://{$node['host']}:{$node['port']}";
         }
 
@@ -84,17 +80,24 @@ abstract class JsonRpcHttpClient
         return $url;
     }
 
+    private function getHeaders()
+    {
+        $auth_user = config('rpc-services.auth_user');
+        $auth_password = config('rpc-services.auth_password');
+        return (new BasicAuthentication($auth_user, $auth_password))->getAuthorizationHeaders();
+    }
+
     /**
      * '获取services'
      * @return array
      */
     private function getServices(): array
     {
-        $array = config('rpc-services.services');
+        $array    = config('rpc-services.services');
         $services = [];
         foreach ($array as $key => $val) {
             foreach ($val['services'] as $k => $v) {
-                $serviceName = strtoupper($v);
+                $serviceName            = strtoupper($v);
                 $services[$serviceName] = $val['nodes'];
             }
         }
