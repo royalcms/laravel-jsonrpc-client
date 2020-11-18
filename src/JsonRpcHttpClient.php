@@ -66,7 +66,7 @@ abstract class JsonRpcHttpClient
         $r        = rand(1, $max);
         $node     = $nodes[$r - 1];
         if (is_array($node)) {
-            $url = (new Node($node['port'], $node['port'], isset($node['path']) ?: null, isset($node['query']) ?: null))->getUrl();
+            $url = (new Node($node['host'], $node['port'], $node['path'], $node['query']))->getUrl();
         }
         else {
             $node = parse_url($node);
@@ -76,9 +76,9 @@ abstract class JsonRpcHttpClient
             elseif ($node['scheme'] == 'http' && empty($node['port'])) {
                 $node['port'] = 80;
             }
-            $url = (new Node($node['port'], $node['port'], isset($node['path']) ?: null, isset($node['query']) ?: null))->getUrl();
+            $url = (new Node($node['host'], $node['port'], $node['path'], $node['query']))->getUrl();
         }
-
+        
         return $url;
     }
 
