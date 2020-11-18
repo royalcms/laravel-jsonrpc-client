@@ -1,7 +1,8 @@
 <?php
 
+namespace Royalcms\Laravel\JsonRpcClient\Exception;
 
-class RPCException
+class RPCException extends \Exception
 {
 
 }
