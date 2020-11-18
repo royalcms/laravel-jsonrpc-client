@@ -63,8 +63,8 @@ class BasicAuthentication
      */
     public function getAuthorization()
     {
-        $username = password_hash($this->username);
-        $password = password_hash($this->password);
+        $username = password_hash($this->username, PASSWORD_DEFAULT);
+        $password = password_hash($this->password, PASSWORD_DEFAULT);
         $authentication = base64_encode("{$username}:{$password}");
         return $authentication;
     }
