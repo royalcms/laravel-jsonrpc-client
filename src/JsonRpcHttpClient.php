@@ -3,6 +3,8 @@
 namespace Royalcms\Laravel\JsonRpcClient;
 
 use Datto\JsonRpc\Http\Client;
+use Royalcms\Laravel\JsonRpcClient\Exception\HTTPException;
+use Royalcms\Laravel\JsonRpcClient\Exception\RPCException;
 
 abstract class JsonRpcHttpClient
 {
@@ -43,14 +45,13 @@ abstract class JsonRpcHttpClient
             if (method_exists($response, 'getMessage') && method_exists($response, 'getCode')) {
                 $message = $response->getMessage();
                 $code    = $response->getCode();
-                throw new \Exception("code:$code,message:$message");
+                throw new RPCException($message, $code);
             }
             return $response;
         } catch (\Exception $exception) {
-            return [
-                'code'    => -1,
-                'message' => $exception->getMessage()
-            ];
+            $message = $exception->getMessage();
+            $code    = $exception->getCode() ?: -1;
+            throw new HTTPException($message, $code);
         }
     }
 
