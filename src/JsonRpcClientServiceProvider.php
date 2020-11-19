@@ -14,10 +14,25 @@ class JsonRpcClientServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this->publishes([
-            __DIR__.'/../config/rpc-services.php' => config_path('rpc-services.php'),
-        ], 'config');
+        $this->publish();
+    }
 
+    /**
+     * Publish config file.
+     */
+    protected function publish()
+    {
+        $source = realpath($raw = __DIR__.'/../config/rpc-services.php') ?: $raw;
+
+        if ($this->app->runningInConsole()) {
+            $this->publishes([
+                $source => config_path('rpc-services.php'),
+            ]);
+        }
+
+        if (! $this->app->configurationIsCached()) {
+            $this->mergeConfigFrom($source, 'rpc-services');
+        }
     }
 
 }
