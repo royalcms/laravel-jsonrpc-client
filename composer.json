@@ -33,6 +33,11 @@
     "extra": {
         "branch-alias": {
             "dev-master": "5.x-dev"
+        },
+        "laravel": {
+            "providers": [
+                "Royalcms\\Laravel\\JsonRpcClient\\JsonRpcClientServiceProvider"
+            ]
         }
     },
     "minimum-stability": "dev"
