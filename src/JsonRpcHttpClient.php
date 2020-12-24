@@ -34,11 +34,8 @@ abstract class JsonRpcHttpClient
     {
         try {
             $headers = $this->getHeaders();
-            $client  = new BasicClient(self::getUri(), $headers);
-            $service = $this->getService();
-            if ($service != 'default') {
-                $method = "{$service}/{$method}";
-            }
+            $client  = new BasicClient($this->getUri(), $headers);
+            $method = $this->filterMethod($method);
             $client->query($method, $params, $response);
             $client->send();
             //如果返回异常，会提示message和code
@@ -55,40 +52,70 @@ abstract class JsonRpcHttpClient
         }
     }
 
+    protected function filterMethod($method)
+    {
+        $service = $this->parserServiceName();
+        if ($service != 'default') {
+            $method = "{$service}/{$method}";
+        }
+        return $method;
+    }
+
     /**
      * @return string
      */
-    private function getUri(): string
+    protected function getUri()
     {
         $services = $this->getServices();
-        $nodes    = $services [strtoupper($this->serviceName)];
+        $nodes    = $services[strtoupper($this->serviceName)];
+        $node = $this->randNode($nodes);
+        return $this->nodeToUrl($node);
+    }
+
+    /**
+     * 从节点池中随机取出一个节点
+     * @param $nodes
+     * @return mixed
+     */
+    private function randNode($nodes)
+    {
         $max      = count($nodes);
         $r        = rand(1, $max);
         $node     = $nodes[$r - 1];
+        return $node;
+    }
 
-
+    /**
+     * 将节点配置转换为url
+     * @param $node
+     * @return string
+     */
+    private function nodeToUrl($node)
+    {
         if (is_array($node)) {
-            $node['path'] = isset($node['path']) ? $node['path'] : null;
+            $node['path']  = isset($node['path']) ? $node['path'] : null;
             $node['query'] = isset($node['query']) ? $node['query'] : null;
-            $url = (new Node($node['host'], $node['port'], $node['path'], $node['query']))->getUrl();
-        }
-        else {
+            $url           = (new Node($node['host'], $node['port'], $node['path'], $node['query']))->getUrl();
+        } else {
             $node = parse_url($node);
             if ($node['scheme'] == 'https' && empty($node['port'])) {
                 $node['port'] = 443;
-            }
-            elseif ($node['scheme'] == 'http' && empty($node['port'])) {
+            } elseif ($node['scheme'] == 'http' && empty($node['port'])) {
                 $node['port'] = 80;
             }
-            $node['path'] = isset($node['path']) ? $node['path'] : null;
+            $node['path']  = isset($node['path']) ? $node['path'] : null;
             $node['query'] = isset($node['query']) ? $node['query'] : null;
-            $url = (new Node($node['host'], $node['port'], $node['path'], $node['query']))->getUrl();
+            $url           = (new Node($node['host'], $node['port'], $node['path'], $node['query']))->getUrl();
         }
 
         return $url;
     }
 
-    private function getHeaders()
+    /**
+     * 自定义请求Header信息
+     * @return string[]
+     */
+    protected function getHeaders()
     {
         $auth_user = config('rpc-services.auth_user');
         $auth_password = config('rpc-services.auth_password');
@@ -99,7 +126,7 @@ abstract class JsonRpcHttpClient
      * '获取services'
      * @return array
      */
-    private function getServices(): array
+    protected function getServices(): array
     {
         $array    = config('rpc-services.services');
         $services = [];
@@ -115,7 +142,7 @@ abstract class JsonRpcHttpClient
     /**
      * @return string
      */
-    private function getService(): string
+    private function parserServiceName(): string
     {
         $service = explode("Service", $this->serviceName)[0];
         return strtolower($service);
