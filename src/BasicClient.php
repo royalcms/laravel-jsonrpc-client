@@ -4,7 +4,6 @@ namespace Royalcms\Laravel\JsonRpcClient;
 
 use Datto\JsonRpc\Client as JsonRpcClient;
 use Datto\JsonRpc\Http\Exceptions\HttpException;
-use Datto\JsonRpc\Http\HttpResponse;
 use Datto\JsonRpc\Responses\ResultResponse;
 use ErrorException;
 

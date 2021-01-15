@@ -42,13 +42,13 @@ abstract class JsonRpcHttpClient
             if (method_exists($response, 'getMessage') && method_exists($response, 'getCode')) {
                 $message = $response->getMessage();
                 $code    = $response->getCode();
-                throw new RPCException($message, $code);
+                throw new RPCException($message, $code, $response);
             }
             return $response;
         } catch (\Exception $exception) {
             $message = $exception->getMessage();
             $code    = $exception->getCode() ?: -1;
-            throw new HTTPException($message, $code);
+            throw new HTTPException($message, $code, $exception);
         }
     }
 
